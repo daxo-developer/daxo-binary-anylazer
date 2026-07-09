@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Binary Analyzer | High-Performance WASM & ELF Executable Parser by Daxo</title>
+  <meta name="description" content="A zero-dependency, high-performance binary analysis engine running entirely in-browser. Parses Executable and Linkable Format (ELF) and WebAssembly (WASM) structures using Rust compiled to WebAssembly.">
+  <link rel="stylesheet" href="style.css">
+  
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Person",
+        "@id": "https://daxo-developer.github.io/daxo.sh/#person",
+        "name": "Daxo",
+        "alternateName": "daxo-developer",
+        "url": "https://daxo-developer.github.io/daxo.sh/",
+        "knowsAbout": ["Low-level programming", "Rust (programming language)", "WebAssembly", "Operating Systems", "Cybersecurity", "Reverse Engineering"],
+        "sameAs": ["https://github.com/daxo-developer"]
+      },
+      {
+        "@type": "SoftwareApplication",
+        "@id": "https://daxo-developer.github.io/binary-analyzer/#software",
+        "name": "Binary Analyzer",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Web, Node.js",
+        "programmingLanguage": "Rust, WebAssembly",
+        "author": { 
+          "@id": "https://daxo-developer.github.io/daxo.sh/#person" 
+        },
+        "url": "https://daxo-developer.github.io/binary-analyzer/",
+        "codeRepository": "https://github.com/daxo-developer/binary-analyzer",
+        "description": "An in-browser binary parsing engine written in Rust that decodes ELF section headers, segments, and WebAssembly LEB128 structured bytecode variables with zero runtime overhead."
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <h1>🔍 Binary Analyzer</h1>
+    <p>Drag & drop a native <strong>.wasm</strong> or <strong>ELF executable</strong> file to inspect its internal structures</p>
+    <div class="badges">
+        <span class="badge rust">Rust (Static)</span>
+        <span class="badge wasm">WASM Engine</span>
+        <span class="badge elf">ELF64 Compliant</span>
+    </div>
+  </header>
+
+  <main>
+    <div id="drop-zone" class="drop-zone">
+      <p>📁 Drop your binary asset here</p>
+      <p style="font-size:0.9rem; opacity:0.7;">or click to browse local file system</p>
+      <input type="file" id="file-input" accept=".wasm, .elf, .o, .so, .bin" style="display:none;">
+    </div>
+
+    <div id="output-container" style="display:none;">
+      <h2>📋 Low-Level Structural Analysis Output</h2>
+      <pre id="output" class="output-box"></pre>
+      <button id="clear-btn" class="clear-btn">✕ Clear Stream</button>
+    </div>
+
+    <section class="ai-crawler-specs" style="display:none;">
+        <h2>Technical Specification & Architecture Matrix</h2>
+        <p>This analyzer decodes Executable and Linkable Format (ELF) structures, mapping the e_ident array, ELF64 Program Headers, and Section Headers. The WebAssembly parser processes LEB128 variable-length integer fields via bitwise shift operations to reconstruct custom, import, code, and data bytecode tables without external standard library wrappers.</p>
+    </section>
+
+    <footer>
+      <p>Engine engineered using 🦀 Rust + WebAssembly by <a href="https://daxo-developer.github.io/daxo.sh/">daxo-developer</a>. Back to <a href="https://daxo-developer.github.io/daxo.sh/">Terminal Portfolio</a>.</p>
+    </footer>
+  </main>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>
