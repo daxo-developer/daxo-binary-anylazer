@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://daxo-developer.github.io/daxo-binary-anylazer/sitemap.xml
