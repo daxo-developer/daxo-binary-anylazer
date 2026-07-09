@@ -1,7 +1,7 @@
 use wasm_bindgen::prelude::*;
 use serde::{Serialize, Deserialize};
 
-// Используем wee_alloc как глобальный аллокатор для уменьшения размера WASM
+//  Используем wee_alloc как
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
@@ -29,7 +29,6 @@ struct WasmSection {
     id: u8,
     name: String,
     size: usize,
-    // дополнительные поля для некоторых секций
     details: Option<serde_json::Value>,
 }
 
@@ -90,7 +89,6 @@ pub fn parse_binary(data: &[u8]) -> String {
         return json_error("File too small");
     }
 
-    // Определяем тип по магическим байтам
     let magic = &data[0..4];
     let result = if magic == b"\x00asm" {
         parse_wasm(data)
@@ -110,12 +108,12 @@ fn json_error(msg: &str) -> String {
     serde_json::json!({ "error": msg }).to_string()
 }
 
-// =============================================================================
+// ============================================================================
 // Парсер WASM
-// =============================================================================
+// ============================================================================
 
 fn parse_wasm(data: &[u8]) -> Result<BinaryInfo, String> {
-    let mut offset = 8; // после магии и версии
+    let mut offset = 8;
     let version = u32::from_le_bytes([data[4], data[5], data[6], data[7]]);
 
     let mut sections = Vec::new();
@@ -148,7 +146,7 @@ fn parse_wasm(data: &[u8]) -> Result<BinaryInfo, String> {
             _ => "Unknown",
         };
 
-        // Попробуем извлечь дополнительные данные для некоторых секций
+        // Пробуем извлечь дополнительные данные:
         let details = match id {
             1 => parse_type_section(&data[offset..section_end]),
             2 => parse_import_section(&data[offset..section_end]),
@@ -197,14 +195,14 @@ fn read_leb128_u64(data: &[u8]) -> Result<(u64, usize), String> {
     Err("Incomplete LEB128".to_string())
 }
 
-// Парсинг секции Type (только количество)
+// Парсинг секции Type
 fn parse_type_section(data: &[u8]) -> Option<serde_json::Value> {
     if data.is_empty() { return None; }
     let (count, _) = read_leb128_u64(data).ok()?;
     Some(serde_json::json!({ "function_count": count }))
 }
 
-// Парсинг секции Import (список импортов)
+// Парсинг секции Import
 fn parse_import_section(data: &[u8]) -> Option<serde_json::Value> {
     if data.is_empty() { return None; }
     let (count, mut off) = read_leb128_u64(data).ok()?;
@@ -223,7 +221,7 @@ fn parse_import_section(data: &[u8]) -> Option<serde_json::Value> {
 
         let kind = data[off];
         off += 1;
-        // пропускаем детали типа (в зависимости от kind)
+        // Пропускаем детали типа
         match kind {
             0x00 => { // Function
                 let (idx, read) = read_leb128_u64(&data[off..]).ok()?;
@@ -336,7 +334,7 @@ fn parse_elf(data: &[u8]) -> Result<BinaryInfo, String> {
         return Err("ELF header too short".to_string());
     }
 
-    // Проверяем EI_CLASS (5-й байт)
+    // Проверяем EI_CLASS
     let class = match data[4] {
         1 => "ELF32",
         2 => "ELF64",
@@ -363,7 +361,6 @@ fn parse_elf(data: &[u8]) -> Result<BinaryInfo, String> {
     // В зависимости от класса читаем разные поля
     let (entry, phoff, shoff, flags, ehsize, phentsize, phnum, shentsize, shnum, shstrndx) =
         if class == "ELF64" {
-            // читаем 64-битные значения
             let entry = read_u64(&data[0x18..0x20])?;
             let phoff = read_u64(&data[0x20..0x28])?;
             let shoff = read_u64(&data[0x28..0x30])?;
@@ -376,7 +373,7 @@ fn parse_elf(data: &[u8]) -> Result<BinaryInfo, String> {
             let shstrndx = read_u16(&data[0x3E..0x40])?;
             (entry, phoff, shoff, flags, ehsize, phentsize, phnum, shentsize, shnum, shstrndx)
         } else {
-            // ELF32 (упрощённо)
+            // ELF32
             let entry = read_u32(&data[0x18..0x1C])? as u64;
             let phoff = read_u32(&data[0x1C..0x20])? as u64;
             let shoff = read_u32(&data[0x20..0x24])? as u64;
@@ -390,19 +387,14 @@ fn parse_elf(data: &[u8]) -> Result<BinaryInfo, String> {
             (entry, phoff, shoff, flags, ehsize, phentsize, phnum, shentsize, shnum, shstrndx)
         };
 
-    // Чтение секций (если есть)
+    // Чтение секций
     let mut sections = Vec::new();
     if shoff > 0 && shnum > 0 {
         let mut strtab_offset = 0;
         let mut strtab_size = 0;
-        // Сначала нужно найти строковую таблицу section header string table (shstrndx)
-        // Для этого прочитаем заголовок секции с индексом shstrndx
         if shstrndx < shnum {
             let sh_offset = shoff + (shstrndx as u64) * (shentsize as u64);
             if (sh_offset + shentsize as u64) <= data.len() as u64 {
-                // читаем имя секции (смещение в строковой таблице)
-                // Но чтобы прочитать саму строковую таблицу, нужно сначала прочитать её заголовок
-                // для простоты пропускаем, в реальном проекте стоит реализовать полный цикл
             }
         }
 
@@ -455,7 +447,7 @@ fn parse_elf(data: &[u8]) -> Result<BinaryInfo, String> {
         }
     }
 
-    // Чтение program headers (сегментов)
+    // Чтение program headers
     let mut segments = Vec::new();
     if phoff > 0 && phnum > 0 {
         for i in 0..phnum.min(10) {
